@@ -89,15 +89,14 @@ void matPrint(Matrix *mat)
 Matrix matTranspose(Matrix *mat)
 {
     Matrix result;
-    result.rows = mat->columns;
-    result.columns = mat->rows;
+    matInit(&result, mat->columns, mat->rows);
 
     for (size_t i = 0; i < result.rows; ++i)
     {
         for (size_t j = 0; j < result.columns; ++j)
         {
             result.elements[i * result.columns + j] =
-                mat->elements[j * result.columns + i];
+                mat->elements[j * mat->columns + i];
         }
     }
 
@@ -190,7 +189,6 @@ Matrix matMul(Matrix *matA, Matrix *matB)
     {
         for (size_t j = 0; j < result.columns; ++j)
         {
-            result.elements[i * result.columns + j] = 0.0;
             for (size_t k = 0; k < matA->columns; ++k)
             {
                 result.elements[i * result.columns + j] +=
