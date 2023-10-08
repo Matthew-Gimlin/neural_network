@@ -105,8 +105,9 @@ Matrix matTranspose(Matrix *mat)
  * @param b An initialized matrix.
  * @return A new result matrix.
  */
-Matrix add(Matrix *a, Matrix *b)
+Matrix matAdd(Matrix *a, Matrix *b)
 {
+    // Must have the same number of elements to add.
     if (a->rows != b->rows || a->columns != b->columns)
     {
         fprintf(stderr,
@@ -136,6 +137,7 @@ Matrix add(Matrix *a, Matrix *b)
  */
 Matrix matSub(Matrix *a, Matrix *b)
 {
+    // Must have the same number of elements to subtract.
     if (a->rows != b->rows || a->columns != b->columns)
     {
         fprintf(stderr,
@@ -165,6 +167,7 @@ Matrix matSub(Matrix *a, Matrix *b)
  */
 Matrix matMul(Matrix *a, Matrix *b)
 {
+    // Required for matrix multiplication.
     if (a->columns != b->rows)
     {
         fprintf(stderr,
@@ -202,6 +205,7 @@ Matrix matMul(Matrix *a, Matrix *b)
  */
 Matrix matElemMul(Matrix *a, Matrix *b)
 {
+    // Must have the same number of elements to multiply.
     if (a->rows != b->rows || a->columns != b->columns)
     {
         fprintf(stderr,

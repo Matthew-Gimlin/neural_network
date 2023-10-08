@@ -18,7 +18,7 @@ void matFree(Matrix *mat);
 void matPrint(Matrix *mat);
 
 Matrix matTranspose(Matrix *mat);
-Matrix add(Matrix *a, Matrix *b);
+Matrix matAdd(Matrix *a, Matrix *b);
 Matrix matSub(Matrix *a, Matrix *b);
 Matrix matMul(Matrix *a, Matrix *b);
 Matrix matElemMul(Matrix *a, Matrix *b);
