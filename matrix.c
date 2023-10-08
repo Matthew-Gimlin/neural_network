@@ -4,12 +4,11 @@
 #include <stdio.h>
 
 /**
- * @brief Initializes a Matrix struct. Allocates a flattened 2D array filled
- *        with the value 0.0.
+ * @brief Creates a zero matrix.
  *
- * @param mat The matrix to initialize.
- * @param rows The number of rows for the matrix.
- * @param columns The number of columns for the matrix.
+ * @param mat An uninitialized matrix.
+ * @param rows A number of rows.
+ * @param columns A number of columns.
  */
 void matInit(Matrix *mat, size_t rows, size_t columns)
 {
@@ -19,10 +18,10 @@ void matInit(Matrix *mat, size_t rows, size_t columns)
 }
 
 /**
- * @brief Copies the contents of a source matrix into a destination matrix.
+ * @brief Performs a deep copy of a matrix.
  *
- * @param src The source matrix.
- * @param dest The destination matrix.
+ * @param src An initialized matrix to copy.
+ * @param dest An uninitialized matrix.
  */
 void matCopy(Matrix *src, Matrix *dest)
 {
@@ -34,25 +33,21 @@ void matCopy(Matrix *src, Matrix *dest)
 }
 
 /**
- * @brief Frees the internal array of a matrix.
+ * @brief Frees the elements of a matrix.
  *
- * @param mat The matrix to free.
+ * @param mat An initialized matrix.
  */
 void matFree(Matrix *mat)
 {
-    if (mat == NULL)
-    {
-        return;
-    }
-    
     free(mat->elements);
+    mat->elements = NULL;
 }
 
 /**
- * @brief Sets all elements of a matrix to a value.
+ * @brief Fills a matrix with a value.
  *
- * @param mat The matrix to set.
- * @param value The value of the elements.
+ * @param mat An initialized matrix.
+ * @param value A value for the matrix elements.
  */
 void matSet(Matrix *mat, float value)
 {
@@ -63,9 +58,9 @@ void matSet(Matrix *mat, float value)
 }
 
 /**
- * @brief Prints the elements of a matrix.
+ * @brief Prints a matrix.
  *
- * @param mat The matix to print.
+ * @param mat An initialized matrix.
  */
 void matPrint(Matrix *mat)
 {
@@ -83,8 +78,8 @@ void matPrint(Matrix *mat)
 /**
  * @brief Tranposes a matrix.
  *
- * @param mat The matrix to transpose.
- * @return A new matrix that stores the result.
+ * @param mat An initialized matrix.
+ * @return A new result matrix.
  */
 Matrix matTranspose(Matrix *mat)
 {
@@ -104,96 +99,93 @@ Matrix matTranspose(Matrix *mat)
 }
 
 /**
- * @brief Performs element-wise matrix addition. The two matrices must have the 
- *        same dimensions.
+ * @brief Performs matrix addition.
  *
- * @param matA The first matrix.
- * @param matB The second matrix.
- * @return A new matrix that stores the result.
+ * @param a An initialized matrix.
+ * @param b An initialized matrix.
+ * @return A new result matrix.
  */
-Matrix matAdd(Matrix *matA, Matrix *matB)
+Matrix add(Matrix *a, Matrix *b)
 {
-    if (matA->rows != matB->rows || matA->columns != matB->columns)
+    if (a->rows != b->rows || a->columns != b->columns)
     {
         fprintf(stderr,
                 "Error: Cannot add matrices (%lu, %lu) and (%lu, %lu)\n",
-                matA->rows, matA->columns,
-                matB->rows, matB->columns);
+                a->rows, a->columns,
+                b->rows, b->columns);
 
         return (Matrix){0, 0, NULL};
     }
     
     Matrix result;
-    matInit(&result, matA->rows, matA->columns);
+    matInit(&result, a->rows, a->columns);
     for (size_t i = 0; i < result.rows * result.columns; ++i)
     {
-        result.elements[i] = matA->elements[i] + matB->elements[i];
+        result.elements[i] = a->elements[i] + b->elements[i];
     }
     
     return result;
 }
 
 /**
- * @brief Performs element-wise matrix subtraction. The two matrices must have
- *        the same dimensions.
+ * @brief Performs matrix subtraction (a minus b).
  *
- * @param matA The first matrix.
- * @param matB The second matrix.
- * @return A new matrix that stores the result.
+ * @param a An initialized matrix.
+ * @param b An initialized matrix.
+ * @return A new result matrix.
  */
-Matrix matSub(Matrix *matA, Matrix *matB)
+Matrix matSub(Matrix *a, Matrix *b)
 {
-    if (matA->rows != matB->rows || matA->columns != matB->columns)
+    if (a->rows != b->rows || a->columns != b->columns)
     {
         fprintf(stderr,
                 "Error: Cannot subtract matrices (%lu, %lu) and (%lu, %lu)\n",
-                matA->rows, matA->columns,
-                matB->rows, matB->columns);
+                a->rows, a->columns,
+                b->rows, b->columns);
         
         return (Matrix){0, 0, NULL};
     }
     
     Matrix result;
-    matInit(&result, matA->rows, matA->columns);
+    matInit(&result, a->rows, a->columns);
     for (size_t i = 0; i < result.rows * result.columns; ++i)
     {
-        result.elements[i] = matA->elements[i] + matB->elements[i];
+        result.elements[i] = a->elements[i] + b->elements[i];
     }
     
     return result;
 }
 
 /**
- * @brief Performs matrix multiplication. The columns of the first matrix must
- *        match the rows of the second.
+ * @brief Performs matrix multiplication (a times b).
  *
- * @param matA The first matrix.
- * @param matB The second matrix.
- * @return A new matrix that stores the result.
+ * @param a An initialized matrix.
+ * @param b An initialized matrix.
+ * @return A new result matrix.
  */
-Matrix matMul(Matrix *matA, Matrix *matB)
+Matrix matMul(Matrix *a, Matrix *b)
 {
-    if (matA->columns != matB->rows)
+    if (a->columns != b->rows)
     {
         fprintf(stderr,
                 "Error: Cannot multiply matrices (%lu, %lu) and (%lu, %lu)\n",
-                matA->rows, matA->columns,
-                matB->rows, matB->columns);
+                a->rows, a->columns,
+                b->rows, b->columns);
         
         return (Matrix){0, 0, NULL};
     }
     
     Matrix result;
-    matInit(&result, matA->rows, matB->columns);
+    matInit(&result, a->rows, b->columns);
     for (size_t i = 0; i < result.rows; ++i)
     {
         for (size_t j = 0; j < result.columns; ++j)
         {
-            for (size_t k = 0; k < matA->columns; ++k)
+            for (size_t k = 0; k < a->columns; ++k)
             {
                 result.elements[i * result.columns + j] +=
-                    matA->elements[i * matA->columns + k] *
-                    matB->elements[k * matB->columns + j];
+                    a->elements[i * a->columns + k] *
+                    b->elements[k * b->columns + j];
             }
         }
     }
@@ -202,30 +194,29 @@ Matrix matMul(Matrix *matA, Matrix *matB)
 }
 
 /**
- * @brief Performs element-wise matrix multiplication. The two matrices must 
- *        have the same dimensions.
+ * @brief Performs element-wise matrix multiplication.
  *
- * @param matA The first matrix.
- * @param matB The second matrix.
- * @return A new matrix that stores the result.
+ * @param a An initialized matrix.
+ * @param b An initialized matrix.
+ * @return A new result matrix.
  */
-Matrix matElemMul(Matrix *matA, Matrix *matB)
+Matrix matElemMul(Matrix *a, Matrix *b)
 {
-    if (matA->rows != matB->rows || matA->columns != matB->columns)
+    if (a->rows != b->rows || a->columns != b->columns)
     {
         fprintf(stderr,
                 "Error: Cannot multiply matrices (%lu, %lu) and (%lu, %lu)\n",
-                matA->rows, matA->columns,
-                matB->rows, matB->columns);
+                a->rows, a->columns,
+                b->rows, b->columns);
 
         return (Matrix){0, 0, NULL};
     }
     
     Matrix result;
-    matInit(&result, matA->rows, matA->columns);
+    matInit(&result, a->rows, a->columns);
     for (size_t i = 0; i < result.rows * result.columns; ++i)
     {
-        result.elements[i] = matA->elements[i] * matB->elements[i];
+        result.elements[i] = a->elements[i] * b->elements[i];
     }
     
     return result;

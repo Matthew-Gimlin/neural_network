@@ -11,16 +11,16 @@ typedef struct
 Matrix;
 
 void matInit(Matrix *mat, size_t rows, size_t columns);
-void matCopy(Matrix *matSrc, Matrix *matDest);
+void matCopy(Matrix *src, Matrix *dest);
 void matSet(Matrix *mat, float value);
 void matFree(Matrix *mat);
 
 void matPrint(Matrix *mat);
 
 Matrix matTranspose(Matrix *mat);
-Matrix matAdd(Matrix *matA, Matrix *matB);
-Matrix matSub(Matrix *matA, Matrix *matB);
-Matrix matMul(Matrix *matA, Matrix *matB);
-Matrix matElemMul(Matrix *matA, Matrix *matB);
+Matrix add(Matrix *a, Matrix *b);
+Matrix matSub(Matrix *a, Matrix *b);
+Matrix matMul(Matrix *a, Matrix *b);
+Matrix matElemMul(Matrix *a, Matrix *b);
 
 #endif
