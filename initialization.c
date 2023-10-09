@@ -8,7 +8,7 @@
  *
  * @param mat An initialized matrix.
  */
-void initNormal(Matrix *mat)
+void initNormalDist(Matrix *mat)
 {
     srand(time(NULL));
     for (size_t i = 0; i < mat->rows * mat->columns; ++i)

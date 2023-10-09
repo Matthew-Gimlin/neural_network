@@ -3,6 +3,6 @@
 
 #include "matrix.h"
 
-void initNormal(Matrix *mat);
+void initNormalDist(Matrix *mat);
 
 #endif

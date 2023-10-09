@@ -66,7 +66,7 @@ void netFree(NeuralNet *net)
 }
 
 /**
- * @brief Predicts the label given a feature matrix.
+ * @brief Predicts the label for a feature.
  *
  * @param net An initialized neural network.
  * @param features A feature matrix.

@@ -11,7 +11,7 @@ int main()
 
     // Initialize the weights by sampling from a normal distribution.
     // Initialize the biases to zero.
-    netInit(&net, 4, layerSizes, initNormal, NULL);
+    netInit(&net, 4, layerSizes, initNormalDist, NULL);
 
     Matrix feature;
     matInit(&feature, 8, 1);
