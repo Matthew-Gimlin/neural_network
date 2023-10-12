@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include <stdio.h>
+
 /**
  * @brief Creates a neural network.
  *
@@ -16,8 +18,8 @@
 void netInit(NeuralNet *net,
              size_t layers,
              size_t *layerSizes,
-             InitFunc initWeights,
-             InitFunc initBiases)
+             NetInitFunc initWeights,
+             NetInitFunc initBiases)
 {
     net->layers = layers;
     net->layerSizes = (size_t *)malloc(layers * sizeof(size_t));
@@ -73,10 +75,11 @@ void netFree(NeuralNet *net)
  * @param activation An activation function.
  * @return An output matrix.
  */
-Matrix netPredict(NeuralNet *net, Matrix *features, ActivationFunc activation)
+Matrix netPredict(NeuralNet *net,
+                  Matrix *features, 
+                  NetActivationFunc activation)
 {
-    Matrix prediction;
-    matCopy(features, &prediction);
+    Matrix prediction = matCopy(features);
     for (size_t i = 0; i < net->layers - 1; ++i)
     {
         Matrix mul = matMul(&net->weights[i], &prediction);
@@ -89,4 +92,127 @@ Matrix netPredict(NeuralNet *net, Matrix *features, ActivationFunc activation)
     }
 
     return prediction;
+}
+
+/**
+ * @brief Shuffles the order of the training data.
+ *
+ * @param trainingFeats A set of training features.
+ * @param trainingLabels A set of labels for each training features.
+ * @param trainingSize The number of training samples.
+ */
+void netShuffle(Matrix *trainingFeats,
+                Matrix *trainingLabels,
+                size_t trainingSize)
+{
+    srand(time(NULL));
+    for (size_t i = trainingSize; i > 0; --i)
+    {
+        size_t j = rand() % (i + 1);
+
+        Matrix tempFeat = trainingFeats[i];
+        trainingFeats[i] = trainingFeats[j];
+        trainingFeats[j] = tempFeat;
+        
+        Matrix tempLabel = trainingLabels[i];
+        trainingLabels[i] = trainingLabels[j];
+        trainingLabels[j] = tempLabel;
+    }
+}
+
+void netStochGradDesc(NeuralNet *net,
+                      Matrix *trainingFeats,
+                      Matrix *trainingLabels,
+                      size_t trainingSize,
+                      NetActivationFunc activation,
+                      NetActivationFunc activationDeriv,
+                      NetCostFunc costDeriv,
+                      size_t epochs,
+                      size_t miniBatchSize,
+                      float learningRate)
+{
+}
+
+/**
+ * @brief Performs the backpropagation algorithm.
+ *
+ * @param net An initialized neural network.
+ * @param features A feature matrix.
+ * @param label The label for the feature matrix.
+ * @param activation An activation function.
+ * @param activationDeriv The derivative of the activation function.
+ * @param costDeriv The derivative of a cost function.
+ * @return Gradients of the weights and biases for each layer.
+ */
+NetGradients netBackprop(NeuralNet *net,
+                         Matrix *features,
+                         Matrix *label,
+                         NetActivationFunc activation,
+                         NetActivationFunc activationDeriv,
+                         NetCostFunc costDeriv)
+{
+    Matrix *weightGradients =
+        (Matrix *)malloc((net->layers - 1) * sizeof(Matrix));
+    Matrix *biasGradients =
+        (Matrix *)malloc((net->layers - 1) * sizeof(Matrix));
+
+    Matrix act = matCopy(features);
+    Matrix *activationOutputs = (Matrix *)malloc(net->layers * sizeof(Matrix));
+    activationOutputs[0] = act;
+    Matrix *activationInputs =
+        (Matrix *)malloc((net->layers - 1) * sizeof(Matrix));
+
+    // Forward pass.
+    for (size_t i = 0; i < net->layers - 1; ++i)
+    {
+        Matrix mul = matMul(&net->weights[i], &act);
+        Matrix add = matAdd(&mul, &net->biases[i]);
+        
+        activationInputs[i] = add;
+        act = activation(&add);
+        activationOutputs[i + 1] = act;
+
+        matFree(&mul);
+    }
+    
+    Matrix costDerivOutput = costDeriv(&activationOutputs[net->layers - 1],
+                                       label);
+    Matrix actDeriv = activationDeriv(&activationInputs[net->layers - 2]);
+    Matrix delta = matElemMul(&costDerivOutput, &actDeriv);
+    biasGradients[net->layers - 2] = delta;
+    Matrix transpose = matTranspose(&activationOutputs[net->layers - 2]);
+    weightGradients[net->layers - 2] = matMul(&delta, &transpose);
+
+    matFree(&costDerivOutput);
+    matFree(&actDeriv);
+    matFree(&transpose);
+
+    // Backward pass.
+    for (size_t i = net->layers - 3; i < net->layers; --i)
+    {
+        actDeriv = activationDeriv(&activationInputs[i]);
+        Matrix weightTranspose = matTranspose(&net->weights[i + 1]);
+        Matrix mul = matMul(&weightTranspose, &delta);
+        delta = matElemMul(&mul, &actDeriv);
+
+        biasGradients[i] = delta;
+        transpose = matTranspose(&activationOutputs[i]);
+        weightGradients[i] = matMul(&delta, &transpose);
+
+        matFree(&actDeriv);
+        matFree(&weightTranspose);
+        matFree(&mul);
+        matFree(&transpose);
+    }
+
+    for (size_t i = 0; i < net->layers - 1; ++i)
+    {
+        matFree(&activationOutputs[i]);
+        matFree(&activationInputs[i]);
+    }
+    matFree(&activationOutputs[net->layers - 1]);
+    free(activationOutputs);
+    free(activationInputs);
+    
+    return (NetGradients){weightGradients, biasGradients};
 }

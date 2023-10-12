@@ -18,18 +18,21 @@ void matInit(Matrix *mat, size_t rows, size_t columns)
 }
 
 /**
- * @brief Performs a deep copy of a matrix.
+ * @brief Performs a deep copy.
  *
- * @param src An initialized matrix to copy.
- * @param dest An uninitialized matrix.
+ * @param mat An initialized matrix.
+ * @return A new matrix copy.
  */
-void matCopy(Matrix *src, Matrix *dest)
+Matrix matCopy(Matrix *mat)
 {
-    matInit(dest, src->rows, src->columns);
-    for (size_t i = 0; i < src->rows * src->columns; ++i)
+    Matrix copy;
+    matInit(&copy, mat->rows, mat->columns);
+    for (size_t i = 0; i < mat->rows * mat->columns; ++i)
     {
-        dest->elements[i] = src->elements[i];
+        copy.elements[i] = mat->elements[i];
     }
+
+    return copy;
 }
 
 /**
@@ -69,7 +72,7 @@ void matPrint(Matrix *mat)
         printf("[ ");
         for (size_t j = 0; j < mat->columns; ++j)
         {
-            printf("%.2f", mat->elements[i * mat->columns + j]);
+            printf("%f ", mat->elements[i * mat->columns + j]);
         }
         printf(" ]\n");
     }

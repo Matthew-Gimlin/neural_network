@@ -11,7 +11,7 @@ typedef struct
 Matrix;
 
 void matInit(Matrix *mat, size_t rows, size_t columns);
-void matCopy(Matrix *src, Matrix *dest);
+Matrix matCopy(Matrix *mat);
 void matSet(Matrix *mat, float value);
 void matFree(Matrix *mat);
 

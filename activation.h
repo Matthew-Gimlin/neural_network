@@ -4,6 +4,6 @@
 #include "matrix.h"
 
 Matrix actSigmoid(Matrix *mat);
-Matrix actSigmoidPrime(Matrix *mat);
+Matrix actSigmoidDeriv(Matrix *mat);
 
 #endif
