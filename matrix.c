@@ -31,7 +31,7 @@ Matrix matCopy(Matrix *mat)
     {
         copy.elements[i] = mat->elements[i];
     }
-
+    
     return copy;
 }
 
@@ -72,9 +72,9 @@ void matPrint(Matrix *mat)
         printf("[ ");
         for (size_t j = 0; j < mat->columns; ++j)
         {
-            printf("%f ", mat->elements[i * mat->columns + j]);
+            printf("%.2f ", mat->elements[i * mat->columns + j]);
         }
-        printf(" ]\n");
+        printf("]\n");
     }
 }
 
@@ -206,7 +206,7 @@ Matrix matMul(Matrix *a, Matrix *b)
  * @param b An initialized matrix.
  * @return A new result matrix.
  */
-Matrix matElemMul(Matrix *a, Matrix *b)
+Matrix matElementMul(Matrix *a, Matrix *b)
 {
     // Must have the same number of elements to multiply.
     if (a->rows != b->rows || a->columns != b->columns)
@@ -224,6 +224,25 @@ Matrix matElemMul(Matrix *a, Matrix *b)
     for (size_t i = 0; i < result.rows * result.columns; ++i)
     {
         result.elements[i] = a->elements[i] * b->elements[i];
+    }
+    
+    return result;
+}
+
+/**
+ * @brief Performs scalar multiplication.
+ *
+ * @param mat An initialized matrix.
+ * @param scalar A scalar.
+ * @return A new result matrix.
+ */
+Matrix matScalarMul(Matrix *mat, float scalar)
+{
+    Matrix result;
+    matInit(&result, mat->rows, mat->columns);
+    for (size_t i = 0; i < result.rows * result.columns; ++i)
+    {
+        result.elements[i] = mat->elements[i] * scalar;
     }
     
     return result;

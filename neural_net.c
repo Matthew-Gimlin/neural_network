@@ -106,7 +106,7 @@ void netShuffle(Matrix *trainingFeats,
                 size_t trainingSize)
 {
     srand(time(NULL));
-    for (size_t i = trainingSize; i > 0; --i)
+    for (size_t i = trainingSize - 1; i > 0; --i)
     {
         size_t j = rand() % (i + 1);
 
@@ -120,6 +120,17 @@ void netShuffle(Matrix *trainingFeats,
     }
 }
 
+/**
+ * @brief Performs stochastic gradient descent.
+ *
+ * @param net An initialized neural network.
+ * @param trainingFeats A set of training features.
+ * @param trainingLabels A set of labels for each training features.
+ * @param trainingSize The number of training samples.
+ * @param epochs A number of epochs.
+ * @param miniBatchSize A number of training samples in a mini batch.
+ * @param learningRate A learning rate.
+ */
 void netStochGradDesc(NeuralNet *net,
                       Matrix *trainingFeats,
                       Matrix *trainingLabels,
@@ -131,6 +142,104 @@ void netStochGradDesc(NeuralNet *net,
                       size_t miniBatchSize,
                       float learningRate)
 {
+    for (size_t i = 1; i <= epochs; ++i)
+    {
+        netShuffle(trainingFeats, trainingLabels, trainingSize);
+        
+        for (size_t j = 0; j < trainingSize; j += miniBatchSize)
+        {
+            if (j + miniBatchSize > trainingSize)
+            {
+                miniBatchSize = trainingSize - j;
+            }
+
+            netUpdateMiniBatch(net,
+                               &trainingFeats[j],
+                               &trainingLabels[j],
+                               miniBatchSize,
+                               activation,
+                               activationDeriv,
+                               costDeriv,
+                               learningRate);
+        }
+
+        printf("Completed epoch %lu of %lu\n", i, epochs);
+    }
+}
+
+void netUpdateMiniBatch(NeuralNet *net,
+                        Matrix *miniBatchFeats,
+                        Matrix *miniBatchLabels,
+                        size_t miniBatchSize,
+                        NetActivationFunc activation,
+                        NetActivationFunc activationDeriv,
+                        NetCostFunc costDeriv,
+                        float learningRate)
+{
+    Matrix *weightGradientSums =
+        (Matrix *)malloc((net->layers - 1) * sizeof(Matrix));
+    Matrix *biasGradientSums =
+        (Matrix *)malloc((net->layers - 1) * sizeof(Matrix));
+    
+    for (size_t i = 0; i < net->layers - 1; ++i)
+    {
+        matInit(&weightGradientSums[i],
+                net->layerSizes[i + 1], 
+                net->layerSizes[i]);
+        matInit(&biasGradientSums[i], net->layerSizes[i + 1], 1);
+    }
+
+    for (size_t i = 0; i < miniBatchSize; ++i)
+    {
+        NetGradients gradients = netBackprop(net,
+                                             &miniBatchFeats[i],
+                                             &miniBatchLabels[i],
+                                             activation,
+                                             activationDeriv,
+                                             costDeriv);
+
+        for (size_t j = 0; j < net->layers - 1; ++j)
+        {
+            Matrix newWeightSum = matAdd(&weightGradientSums[j],
+                                         &gradients.weightGrads[j]);
+            Matrix newBiasSum = matAdd(&biasGradientSums[j],
+                                       &gradients.biasGrads[j]);
+
+            matFree(&weightGradientSums[j]);
+            matFree(&biasGradientSums[j]);
+            weightGradientSums[j] = newWeightSum;
+            biasGradientSums[j] = newBiasSum;
+            
+            matFree(&gradients.weightGrads[j]);
+            matFree(&gradients.biasGrads[j]);
+        }
+        
+        free(gradients.weightGrads);
+        free(gradients.biasGrads);
+    }
+
+    for (size_t i = 0; i < net->layers - 1; ++i)
+    {
+        Matrix weightGradAvgs = matScalarMul(&weightGradientSums[i],
+                                             learningRate / miniBatchSize);
+        Matrix biasGradAvgs = matScalarMul(&biasGradientSums[i],
+                                           learningRate / miniBatchSize);
+        Matrix newWeights = matSub(&net->weights[i], &weightGradAvgs);
+        Matrix newBiases = matSub(&net->biases[i], &biasGradAvgs);
+
+        matFree(&net->weights[i]);
+        matFree(&net->biases[i]);
+        net->weights[i] = newWeights;
+        net->biases[i] = newBiases;
+
+        matFree(&weightGradAvgs);
+        matFree(&biasGradAvgs);
+        matFree(&weightGradientSums[i]);
+        matFree(&biasGradientSums[i]);
+    }
+
+    free(weightGradientSums);
+    free(biasGradientSums);
 }
 
 /**
@@ -155,7 +264,7 @@ NetGradients netBackprop(NeuralNet *net,
         (Matrix *)malloc((net->layers - 1) * sizeof(Matrix));
     Matrix *biasGradients =
         (Matrix *)malloc((net->layers - 1) * sizeof(Matrix));
-
+    
     Matrix act = matCopy(features);
     Matrix *activationOutputs = (Matrix *)malloc(net->layers * sizeof(Matrix));
     activationOutputs[0] = act;
@@ -178,7 +287,7 @@ NetGradients netBackprop(NeuralNet *net,
     Matrix costDerivOutput = costDeriv(&activationOutputs[net->layers - 1],
                                        label);
     Matrix actDeriv = activationDeriv(&activationInputs[net->layers - 2]);
-    Matrix delta = matElemMul(&costDerivOutput, &actDeriv);
+    Matrix delta = matElementMul(&costDerivOutput, &actDeriv);
     biasGradients[net->layers - 2] = delta;
     Matrix transpose = matTranspose(&activationOutputs[net->layers - 2]);
     weightGradients[net->layers - 2] = matMul(&delta, &transpose);
@@ -193,7 +302,7 @@ NetGradients netBackprop(NeuralNet *net,
         actDeriv = activationDeriv(&activationInputs[i]);
         Matrix weightTranspose = matTranspose(&net->weights[i + 1]);
         Matrix mul = matMul(&weightTranspose, &delta);
-        delta = matElemMul(&mul, &actDeriv);
+        delta = matElementMul(&mul, &actDeriv);
 
         biasGradients[i] = delta;
         transpose = matTranspose(&activationOutputs[i]);

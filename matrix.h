@@ -21,6 +21,7 @@ Matrix matTranspose(Matrix *mat);
 Matrix matAdd(Matrix *a, Matrix *b);
 Matrix matSub(Matrix *a, Matrix *b);
 Matrix matMul(Matrix *a, Matrix *b);
-Matrix matElemMul(Matrix *a, Matrix *b);
+Matrix matElementMul(Matrix *a, Matrix *b);
+Matrix matScalarMul(Matrix *mat, float scalar);
 
 #endif

@@ -18,7 +18,7 @@ NeuralNet;
 
 typedef struct
 {
-    Matrix *weights, *biases;
+    Matrix *weightGrads, *biasGrads;
 }
 NetGradients;
 
@@ -46,6 +46,14 @@ void netStochGradDesc(NeuralNet *net,
                       size_t epochs,
                       size_t miniBatchSize,
                       float learningRate);
+void netUpdateMiniBatch(NeuralNet *net,
+                        Matrix *miniBatchFeats,
+                        Matrix *miniBatchLabels,
+                        size_t miniBatchSize,
+                        NetActivationFunc activation,
+                        NetActivationFunc activationDeriv,
+                        NetCostFunc costDeriv,
+                        float learningRate);
 NetGradients netBackprop(NeuralNet *net,
                          Matrix *features,
                          Matrix *label,

@@ -6,6 +6,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+void printWeights(NeuralNet *net)
+{
+    for (size_t i = 0; i < net->layers - 1; ++i)
+    {
+        printf("Weight matrix %lu:\n", i);
+        matPrint(&net->weights[i]);
+    }
+}
+
 int main()
 {
     size_t layerSizes[] = {8, 4, 4, 2};
@@ -15,40 +24,43 @@ int main()
     // Initialize the biases to zero.
     netInit(&net, 4, layerSizes, initNormalDist, NULL);
 
-    Matrix feats;
-    matInit(&feats, 8, 1);
-    feats.elements[0] = 1.0f;
+    printWeights(&net);
 
-    // Make a random prediction.
-    Matrix pred = netPredict(&net, &feats, actSigmoid);
-    printf("Prediction:\n");
-    matPrint(&pred);
-
-    Matrix label;
-    matInit(&label, 2, 1);
-    label.elements[0] = 1.0f;
-
-    NetGradients grads = netBackprop(&net,
-                                     &feats,
-                                     &label,
-                                     actSigmoid,
-                                     actSigmoidDeriv,
-                                     costSquaredErrDeriv);
-
-    for (size_t i = 0; i < 3; ++i)
+    Matrix *feats = (Matrix *)malloc(10 * sizeof(Matrix));
+    for (size_t i = 0; i < 10; ++i)
     {
-        printf("Gradient %lu:\n", i);
-        matPrint(&grads.weights[i]);
-
-        matFree(&grads.weights[i]);
-        matFree(&grads.biases[i]);
+        matInit(&feats[i], 8, 1);
+        feats[i].elements[i % 8] = 1.0f;
     }
-    free(grads.weights);
-    free(grads.biases);
+
+    Matrix *labels = (Matrix *)malloc(10 * sizeof(Matrix));
+    for (size_t i = 0; i < 10; ++i)
+    {
+        matInit(&labels[i], 2, 1);
+        labels[i].elements[i % 2] = 1.0f;
+    }
+
+    netStochGradDesc(&net,
+                     feats,
+                     labels,
+                     10,
+                     actSigmoid,
+                     actSigmoidDeriv,
+                     costSquaredErrDeriv,
+                     10,
+                     3,
+                     0.1);
+    
+    printWeights(&net);
     
     netFree(&net);
-    matFree(&feats);
-    matFree(&pred);
+    for (size_t i = 0; i < 10; ++i)
+    {
+        matFree(&feats[i]);
+        matFree(&labels[i]);
+    }
+    free(feats);
+    free(labels);
     
     return 0;
 }
