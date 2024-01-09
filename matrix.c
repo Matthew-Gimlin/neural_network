@@ -72,10 +72,30 @@ void matPrint(Matrix *mat)
         printf("[ ");
         for (size_t j = 0; j < mat->columns; ++j)
         {
-            printf("%.2f ", mat->elements[i * mat->columns + j]);
+            printf("%f ", mat->elements[i * mat->columns + j]);
         }
         printf("]\n");
     }
+}
+
+/**
+ * @brief Finds the maximum element.
+ *
+ * @param mat An initialized matrix.
+ * @return The index of the maximum element.
+ */
+size_t matMaxElement(Matrix *mat)
+{
+    size_t maxElemIndex = 0;
+    for (size_t i = 0; i < mat->rows * mat->columns; ++i)
+    {
+        if (mat->elements[i] >= mat->elements[maxElemIndex])
+        {
+            maxElemIndex = i;
+        }
+    }
+
+    return maxElemIndex;
 }
 
 /**
@@ -155,7 +175,7 @@ Matrix matSub(Matrix *a, Matrix *b)
     matInit(&result, a->rows, a->columns);
     for (size_t i = 0; i < result.rows * result.columns; ++i)
     {
-        result.elements[i] = a->elements[i] + b->elements[i];
+        result.elements[i] = a->elements[i] - b->elements[i];
     }
     
     return result;

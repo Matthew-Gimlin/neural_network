@@ -36,16 +36,16 @@ void netFree(NeuralNet *net);
 Matrix netPredict(NeuralNet *net,
                   Matrix *features,
                   NetActivationFunc activation);
-void netStochGradDesc(NeuralNet *net,
-                      Matrix *trainingFeats,
-                      Matrix *trainingLabels,
-                      size_t trainingSize,
-                      NetActivationFunc activation,
-                      NetActivationFunc activationDeriv,
-                      NetCostFunc costDeriv,
-                      size_t epochs,
-                      size_t miniBatchSize,
-                      float learningRate);
+void netTrain(NeuralNet *net,
+              Matrix *trainingFeats,
+              Matrix *trainingLabels,
+              size_t trainingSize,
+              NetActivationFunc activation,
+              NetActivationFunc activationDeriv,
+              NetCostFunc costDeriv,
+              size_t epochs,
+              size_t miniBatchSize,
+              float learningRate);
 void netUpdateMiniBatch(NeuralNet *net,
                         Matrix *miniBatchFeats,
                         Matrix *miniBatchLabels,
@@ -60,5 +60,10 @@ NetGradients netBackprop(NeuralNet *net,
                          NetActivationFunc activation,
                          NetActivationFunc activationDeriv,
                          NetCostFunc costDeriv);
+size_t netTest(NeuralNet *net,
+              Matrix *testingFeats,
+              Matrix *testingLabels,
+              size_t testingSize,
+              NetActivationFunc activation);
 
 #endif

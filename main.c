@@ -6,61 +6,97 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void printWeights(NeuralNet *net)
+Matrix *loadFeatures(const char *fileName, size_t samples)
 {
-    for (size_t i = 0; i < net->layers - 1; ++i)
+    FILE *file = fopen(fileName, "rb");
+
+    // Skip the file header.
+    fseek(file, 16, SEEK_SET);
+
+    Matrix *data = (Matrix *)malloc(samples * sizeof(Matrix));
+    for (size_t i = 0; i < samples; ++i)
     {
-        printf("Weight matrix %lu:\n", i);
-        matPrint(&net->weights[i]);
+        matInit(&data[i], 28*28, 1);
+        for (size_t j = 0; j < 28*28; ++j)
+        {
+            data[i].elements[j] = (unsigned char)fgetc(file) / 255.0f;
+        }
     }
+
+    return data;
+}
+
+Matrix *loadLabels(const char *fileName, size_t samples)
+{
+    FILE *file = fopen(fileName, "rb");
+
+    // Skip the file header.
+    fseek(file, 8, SEEK_SET);
+
+    Matrix *data = (Matrix *)malloc(samples * sizeof(Matrix));
+    for (size_t i = 0; i < samples; ++i)
+    {
+        matInit(&data[i], 10, 1);
+        data[i].elements[fgetc(file)] = 1.0;
+    }
+
+    return data;
 }
 
 int main()
 {
-    size_t layerSizes[] = {8, 4, 4, 2};
+    // Set up the neural network.
+    const size_t layers = 4;
+    size_t layerSizes[] = {28*28, 16, 16, 10};
     NeuralNet net;
+    netInit(&net, layers, layerSizes, initNormalDist, NULL);
 
-    // Initialize the weights by sampling from a normal distribution.
-    // Initialize the biases to zero.
-    netInit(&net, 4, layerSizes, initNormalDist, NULL);
+    // Train the neural network on the MNIST dataset.
+    const size_t trainingSize = 60000;
+    Matrix *trainingFeats = loadFeatures("./data/train-images-idx3-ubyte", trainingSize);
+    Matrix *trainingLabels = loadLabels("./data/train-labels-idx1-ubyte", trainingSize);
+    netTrain(&net,
+             trainingFeats,
+             trainingLabels,
+             trainingSize,
+             actSigmoid,
+             actSigmoidDeriv,
+             costSquaredErrDeriv,
+             30,
+             10,
+             2.0f);
 
-    printWeights(&net);
+    // Test the neural network.
+    const size_t testingSize = 10000;
+    Matrix *testingFeats = loadFeatures("./data/t10k-images-idx3-ubyte", testingSize);
+    Matrix *testingLabels = loadLabels("./data/t10k-labels-idx1-ubyte", testingSize);
+    size_t correct = netTest(&net,
+                             testingFeats,
+                             testingLabels,
+                             testingSize,
+                             actSigmoid);
 
-    Matrix *feats = (Matrix *)malloc(10 * sizeof(Matrix));
-    for (size_t i = 0; i < 10; ++i)
-    {
-        matInit(&feats[i], 8, 1);
-        feats[i].elements[i % 8] = 1.0f;
-    }
-
-    Matrix *labels = (Matrix *)malloc(10 * sizeof(Matrix));
-    for (size_t i = 0; i < 10; ++i)
-    {
-        matInit(&labels[i], 2, 1);
-        labels[i].elements[i % 2] = 1.0f;
-    }
-
-    netStochGradDesc(&net,
-                     feats,
-                     labels,
-                     10,
-                     actSigmoid,
-                     actSigmoidDeriv,
-                     costSquaredErrDeriv,
-                     10,
-                     3,
-                     0.1);
+    // Ouput the test results.
+    float accuracy = (float)correct / testingSize;
+    printf("%lu correct of %lu\n", correct, testingSize);
+    printf("Accuracy: %.2f\n", accuracy);
     
-    printWeights(&net);
-    
+    // Free all allocated memory.
+    for (size_t i = 0; i < trainingSize; ++i)
+    {
+        matFree(&trainingFeats[i]);
+        matFree(&trainingLabels[i]);
+    }
+    for (size_t i = 0; i < testingSize; ++i)
+    {
+        matFree(&testingFeats[i]);
+        matFree(&testingLabels[i]);
+    }
+    free(trainingFeats);
+    free(trainingLabels);
+    free(testingFeats);
+    free(testingLabels);
     netFree(&net);
-    for (size_t i = 0; i < 10; ++i)
-    {
-        matFree(&feats[i]);
-        matFree(&labels[i]);
-    }
-    free(feats);
-    free(labels);
     
     return 0;
 }

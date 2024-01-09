@@ -17,6 +17,8 @@ void matFree(Matrix *mat);
 
 void matPrint(Matrix *mat);
 
+size_t matMaxElement(Matrix *mat);
+
 Matrix matTranspose(Matrix *mat);
 Matrix matAdd(Matrix *a, Matrix *b);
 Matrix matSub(Matrix *a, Matrix *b);

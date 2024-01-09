@@ -8,5 +8,5 @@ Matrix costSquaredErr(Matrix *prediction, Matrix *label)
 
 Matrix costSquaredErrDeriv(Matrix *prediction, Matrix *label)
 {
-    return matSub(label, prediction);
+    return matSub(prediction, label);
 }
