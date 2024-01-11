@@ -10,15 +10,13 @@ built using the `Makefile` file.
 
 ```
 $ make
-gcc -Wall -O2 -c main.c -o main.o -lm
-gcc -Wall -O2 -c matrix.c -o matrix.o -lm
-gcc -Wall -O2 -c activation.c -o activation.o -lm
-gcc -Wall -O2 -c initialization.c -o initialization.o -lm
-gcc -Wall -O2 -c neural_net.c -o neural_net.o -lm
-gcc -Wall -O2 -c cost.c -o cost.o -lm
-gcc main.o matrix.o activation.o initialization.o neural_net.o cost.o -o net -lm
+gcc -Wall -O2 -c src/activation.c -o src/activation.o -lm
+gcc -Wall -O2 -c src/initialization.c -o src/initialization.o -lm
+gcc -Wall -O2 -c src/neural_net.c -o src/neural_net.o -lm
+gcc -Wall -O2 -c src/cost.c -o src/cost.o -lm
+gcc main.o src/matrix.o src/activation.o src/initialization.o src/neural_net.o src/cost.o -o net -lm
 
 $ ./net
-9415 correct of 10000
+9401 correct of 10000
 Accuracy: 0.94
 ```

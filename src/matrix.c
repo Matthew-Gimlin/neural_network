@@ -113,8 +113,7 @@ Matrix matTranspose(Matrix *mat)
     {
         for (size_t j = 0; j < result.columns; ++j)
         {
-            result.elements[i * result.columns + j] =
-                mat->elements[j * mat->columns + i];
+            result.elements[i * result.columns + j] = mat->elements[j * mat->columns + i];
         }
     }
 
@@ -210,8 +209,7 @@ Matrix matMul(Matrix *a, Matrix *b)
             for (size_t k = 0; k < a->columns; ++k)
             {
                 result.elements[i * result.columns + j] +=
-                    a->elements[i * a->columns + k] *
-                    b->elements[k * b->columns + j];
+                    a->elements[i * a->columns + k] * b->elements[k * b->columns + j];
             }
         }
     }

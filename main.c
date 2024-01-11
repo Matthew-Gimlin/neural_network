@@ -1,8 +1,8 @@
-#include "matrix.h"
-#include "neural_net.h"
-#include "initialization.h"
-#include "activation.h"
-#include "cost.h"
+#include "src/matrix.h"
+#include "src/neural_net.h"
+#include "src/initialization.h"
+#include "src/activation.h"
+#include "src/cost.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -76,7 +76,7 @@ int main()
                              testingSize,
                              actSigmoid);
 
-    // Ouput the test results.
+    // Output the test results.
     float accuracy = (float)correct / testingSize;
     printf("%lu correct of %lu\n", correct, testingSize);
     printf("Accuracy: %.2f\n", accuracy);

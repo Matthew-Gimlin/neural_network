@@ -16,8 +16,7 @@ void initNormalDist(Matrix *mat)
         // Use the Box-Muller transform to sample from a normal distribution.
         float uniform1 = (float)rand() / RAND_MAX;
         float uniform2 = (float)rand() / RAND_MAX;
-        float normal = 
-            sqrtf(-2.0f * logf(uniform1)) * cosf(2.0f * M_PI * uniform2);
+        float normal = sqrtf(-2.0f * logf(uniform1)) * cosf(2.0f * M_PI * uniform2);
 
         mat->elements[i] = normal;
     }

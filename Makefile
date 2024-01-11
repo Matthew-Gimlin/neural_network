@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -O2
-SOURCES = main.c matrix.c activation.c initialization.c neural_net.c cost.c
-HEADERS = matrix.h activation.h initialization.h neural_net.h cost.h
+SOURCES = main.c src/matrix.c src/activation.c src/initialization.c src/neural_net.c src/cost.c
+HEADERS = src/matrix.h src/activation.h src/initialization.h src/neural_net.h src/cost.h
 OBJECTS = $(SOURCES:.c=.o)
 LIBRARIES = -lm
 EXECUTABLE = net
