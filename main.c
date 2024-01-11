@@ -52,6 +52,7 @@ int main()
     netInit(&net, layers, layerSizes, initNormalDist, NULL);
 
     // Train the neural network on the MNIST dataset.
+    printf("Training...\n");
     const size_t trainingSize = 60000;
     Matrix *trainingFeats = loadFeatures("./data/train-images-idx3-ubyte", trainingSize);
     Matrix *trainingLabels = loadLabels("./data/train-labels-idx1-ubyte", trainingSize);
@@ -67,6 +68,7 @@ int main()
              2.0f);
 
     // Test the neural network.
+    printf("Testing...\n");
     const size_t testingSize = 10000;
     Matrix *testingFeats = loadFeatures("./data/t10k-images-idx3-ubyte", testingSize);
     Matrix *testingLabels = loadLabels("./data/t10k-labels-idx1-ubyte", testingSize);
